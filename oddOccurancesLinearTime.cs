@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -12,17 +13,20 @@ public class Program
 	}
 	public static int FindOdd(int[] integers)
 	{
-		Dictionary<int,bool> currentOddOccurances = new Dictionary<int,bool>();
-		
+		ConcurrentDictionary<int,bool> currentOddOccurances = new ConcurrentDictionary<int, bool>();
 		Parallel.ForEach(integers, i=>
 		{
 			if(currentOddOccurances.ContainsKey(i))
 			{
-				currentOddOccurances.Remove(i);	
+				bool success=false;
+				while(!success)
+				{
+					currentOddOccurances.TryRemove(i,out success);	
+				}
 			}
 			else
 			{
-				currentOddOccurances.Add(i,true);
+				currentOddOccurances.TryAdd(i,true);
 			}
 		});
 		
